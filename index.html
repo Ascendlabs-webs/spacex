@@ -1,0 +1,944 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>AETHER — Intelligence at the edge of space</title>
+    <meta name="description" content="AETHER is a scroll-driven journey through a speculative intelligence system built for the far edge of space. Follow the signal from first light to the outer frontier." />
+    <meta name="theme-color" content="#06070a" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+
+    <!-- Social sharing -->
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="AETHER" />
+    <meta property="og:title" content="AETHER — Intelligence at the edge of space" />
+    <meta property="og:description" content="A scroll-driven journey into the architecture of a mind built for deep space." />
+    <meta property="og:image" content="__SITE_URL__/og-image.jpg" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content="AETHER — Intelligence at the edge of space" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="AETHER — Intelligence at the edge of space" />
+    <meta name="twitter:description" content="A scroll-driven journey into the architecture of a mind built for deep space." />
+    <meta name="twitter:image" content="__SITE_URL__/og-image.jpg" />
+    <link rel="canonical" href="__SITE_URL__/" data-site-url-only />
+    <meta property="og:url" content="__SITE_URL__/" data-site-url-only />
+
+    <!-- Structured data -->
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "WebSite",
+        "name": "AETHER",
+        "description": "A scroll-driven journey through a speculative intelligence system built for the far edge of space.",
+        "inLanguage": "en"
+      }
+    </script>
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;700&family=Space+Grotesk:wght@300;400;500;600;700&family=Syne:wght@500;700;800;900&display=swap" rel="stylesheet" />
+
+    <link rel="stylesheet" href="/src/style.css" />
+
+    <!-- Without JavaScript the pinned reel would trap its content off screen. -->
+    <noscript>
+      <style>
+        .horizontal-scroll-container { height: auto !important; }
+        .horizontal-sticky-wrapper { position: static; height: auto; }
+        .horizontal-track { overflow-x: auto; transform: none !important; }
+      </style>
+    </noscript>
+  </head>
+  <body class="theme-midnight">
+    <!-- Quiet, photographic backdrop shared across the scroll chapters -->
+    <div id="space-backdrop" aria-hidden="true">
+      <picture>
+        <source id="space-backdrop-avif" type="image/avif" srcset="/assets/nasa-earth-horizon-640.avif 640w, /assets/nasa-earth-horizon-1024.avif 1024w, /assets/nasa-earth-horizon-1440.avif 1440w, /assets/nasa-earth-horizon-1920.avif 1920w" sizes="100vw" />
+        <source id="space-backdrop-webp" type="image/webp" srcset="/assets/nasa-earth-horizon-640.webp 640w, /assets/nasa-earth-horizon-1024.webp 1024w, /assets/nasa-earth-horizon-1440.webp 1440w, /assets/nasa-earth-horizon-1920.webp 1920w" sizes="100vw" />
+        <img id="space-backdrop-image" src="/assets/nasa-earth-horizon.jpg" alt="" fetchpriority="high" decoding="async" width="1920" height="1280" />
+      </picture>
+      <div class="space-backdrop-scrim"></div>
+    </div>
+
+    <!-- Custom Magnetic Cursor -->
+    <div id="cursor-dot"></div>
+    <div id="cursor-ring">
+      <span id="cursor-label"></span>
+    </div>
+
+    <a class="skip-link" href="#hero">Skip to experience</a>
+
+    <!-- Top Global HUD Navigation -->
+    <header id="hud-header">
+      <div class="hud-left">
+        <a href="#hero" class="brand-logo" data-cursor="EXPLORE">
+          <span class="logo-orb"></span>
+          <span class="logo-title">AETHER</span>
+          <span class="logo-sub">FIELD NOTES · 01</span>
+        </a>
+        <div class="hud-status-badge">
+          <span class="status-dot pulse"></span>
+          <span class="status-text">SIGNAL: CONNECTED</span>
+        </div>
+      </div>
+
+      <nav class="hud-nav" aria-label="Page navigation">
+        <a href="#hero" class="nav-link active" data-cursor="JUMP">01 · ORIGIN</a>
+        <a href="#aperture-section" class="nav-link" data-cursor="JUMP">02 · PERCEPTION</a>
+        <a href="#horizontal-section" class="nav-link" data-cursor="JUMP">03 · HARDWARE</a>
+        <a href="#stack-section" class="nav-link" data-cursor="JUMP">04 · ARCHITECTURE</a>
+        <a href="#telemetry-section" class="nav-link" data-cursor="JUMP">05 · SIGNAL</a>
+        <a href="#console-section" class="nav-link" data-cursor="JUMP">06 · FIELD LOG</a>
+      </nav>
+
+      <div class="hud-right">
+        <button id="audio-toggle" class="hud-btn" data-cursor="TOGGLE" aria-label="Toggle ambient audio">
+          <div class="eq-icon">
+            <span class="bar"></span>
+            <span class="bar"></span>
+            <span class="bar"></span>
+            <span class="bar"></span>
+          </div>
+          <span id="audio-label">AUDIO: OFF</span>
+        </button>
+
+        <div class="velocity-widget" title="Current scroll velocity">
+          <span class="vel-label">VEL</span>
+          <span id="velocity-val">0</span>
+          <span class="vel-unit">PX/S</span>
+        </div>
+
+        <button id="warp-link-btn" type="button" class="hud-cta" data-cursor="OPEN">WARP LINK</button>
+      </div>
+    </header>
+
+    <!-- Top Glowing Progress Bar & Floating Indicator -->
+    <div id="progress-container">
+      <div id="progress-bar">
+        <div id="progress-spark"></div>
+      </div>
+    </div>
+    <div id="scroll-percentage-tag">00%</div>
+
+    <!-- Side Scrub Navigation Track -->
+    <nav class="side-scrub-nav" aria-label="Chapter shortcuts">
+      <div class="scrub-line" aria-hidden="true">
+        <div class="scrub-indicator" id="scrub-thumb"></div>
+      </div>
+      <button class="scrub-node active" type="button" data-target="#hero" aria-label="Chapter 1: Origin">01</button>
+      <button class="scrub-node" type="button" data-target="#aperture-section" aria-label="Chapter 2: Perception">02</button>
+      <button class="scrub-node" type="button" data-target="#horizontal-section" aria-label="Chapter 3: Hardware">03</button>
+      <button class="scrub-node" type="button" data-target="#stack-section" aria-label="Chapter 4: Architecture">04</button>
+      <button class="scrub-node" type="button" data-target="#telemetry-section" aria-label="Chapter 5: Signal">05</button>
+      <button class="scrub-node" type="button" data-target="#console-section" aria-label="Chapter 6: Field recorder">06</button>
+      <button class="scrub-node" type="button" data-target="#cta-section" aria-label="Final chapter">07</button>
+    </nav>
+
+    <!-- Main Scroll Container -->
+    <main id="smooth-wrapper">
+
+      <!-- ==============================================
+           SECTION 01: HERO / GENESIS
+           ============================================== -->
+      <section id="hero" class="scroll-section">
+        <div class="hero-scene" aria-hidden="true">
+          <picture>
+            <source type="image/avif" srcset="/assets/nasa-earth-horizon-640.avif 640w, /assets/nasa-earth-horizon-1024.avif 1024w, /assets/nasa-earth-horizon-1440.avif 1440w, /assets/nasa-earth-horizon-1920.avif 1920w" sizes="100vw" />
+            <source type="image/webp" srcset="/assets/nasa-earth-horizon-640.webp 640w, /assets/nasa-earth-horizon-1024.webp 1024w, /assets/nasa-earth-horizon-1440.webp 1440w, /assets/nasa-earth-horizon-1920.webp 1920w" sizes="100vw" />
+            <img src="/assets/nasa-earth-horizon.jpg" alt="" fetchpriority="high" decoding="async" width="1920" height="1280" />
+          </picture>
+          <div class="hero-scene-scrim"></div>
+          <span class="scene-caption">ISS 71 · EARTHSET · SOUTH ATLANTIC</span>
+        </div>
+        <div class="hero-bg-glow"></div>
+
+        <div class="hero-container">
+          <div class="hero-eyebrow">
+            <span class="eyebrow-tag"><span class="status-dot pulse"></span> A SIGNAL FROM THE FUTURE</span>
+            <span class="eyebrow-divider">//</span>
+            <span class="eyebrow-geo">FIELD STUDY Nº 001 · DEEP SPACE</span>
+          </div>
+
+          <h1 class="hero-title">
+            <span class="title-row" id="hero-row-1">A MIND</span>
+            <span class="title-row title-accent" id="hero-row-2">WITHOUT</span>
+            <span class="title-row title-outline" id="hero-row-3">HORIZONS.</span>
+          </h1>
+
+          <p class="hero-description" id="hero-desc">
+            Light-years from home, a new kind of intelligence learns to see, think, and move on its own.
+            This is the architecture of a mind made for the unknown.
+          </p>
+
+          <div class="hero-actions">
+            <a href="#aperture-section" class="btn btn-primary" data-cursor="ENGAGE">
+              <span>ENTER THE SIGNAL</span>
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+            </a>
+            <a href="#horizontal-section" class="btn btn-secondary" data-cursor="EXPLORE">
+              <span>MEET THE SYSTEM</span>
+            </a>
+          </div>
+
+          <!-- Hero Parallax Telemetry Widgets -->
+          <div class="hero-widgets">
+            <div class="telemetry-card widget-left" id="widget-left">
+              <div class="card-header">
+                <span class="sensor-indicator"></span>
+                <span class="card-title">ORBITAL RELAY</span>
+                <span class="card-coord">NASA / ISS</span>
+              </div>
+              <div class="card-value">51.64° <span class="unit">INCLINATION</span></div>
+              <div class="sparkline-container">
+                <svg class="sparkline" viewBox="0 0 100 24" preserveAspectRatio="none">
+                  <path d="M0,18 Q15,4 30,14 T60,8 T85,16 L100,6" fill="none" style="stroke: var(--accent)" stroke-width="2"/>
+                </svg>
+              </div>
+              <div class="card-footer">SIGNAL LINK // NOMINAL</div>
+            </div>
+
+            <div class="telemetry-card widget-right" id="widget-right">
+              <div class="card-header">
+                <span class="sensor-indicator pulse-purple"></span>
+                <span class="card-title">OUTBOUND SIGNAL</span>
+                <span class="card-coord">SIMULATED</span>
+              </div>
+              <div class="card-value">0.42 <span class="unit">S DELAY</span></div>
+              <div class="sparkline-container">
+                <svg class="sparkline" viewBox="0 0 100 24" preserveAspectRatio="none">
+                  <path d="M0,8 Q20,20 40,6 T70,16 T90,4 L100,12" fill="none" style="stroke: var(--purple)" stroke-width="2"/>
+                </svg>
+              </div>
+              <div class="card-footer">ILLUSTRATIVE SIGNAL MODEL</div>
+            </div>
+          </div>
+
+          <!-- Scroll Indicator -->
+          <div class="scroll-prompt" id="scroll-prompt" data-cursor="SCROLL">
+            <div class="mouse-icon">
+              <div class="mouse-wheel"></div>
+            </div>
+            <span class="scroll-text">SCROLL TO FOLLOW THE SIGNAL</span>
+            <div class="scroll-arrow">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M19 12l-7 7-7-7"/></svg>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ==============================================
+           SECTION 02: THE APERTURE (PINNED SCROLL STORY)
+           Spans 300vh for continuous scroll control
+           ============================================== -->
+      <section id="aperture-section" class="pinned-section">
+        <div class="pinned-container" id="aperture-sticky">
+          <div class="aperture-overlay-grid"></div>
+
+          <!-- Section Label -->
+          <div class="aperture-header">
+            <div class="badge-pill">CHAPTER 02 // FIRST CONTACT</div>
+            <h2 class="aperture-title">LEARNING TO SEE</h2>
+            <p class="aperture-subtitle">Before a mind can decide, it has to make sense of the dark.</p>
+          </div>
+
+          <div class="aperture-scene" aria-hidden="true">
+            <picture>
+              <source type="image/avif" srcset="/assets/nasa-aurora-horizon-640.avif 640w, /assets/nasa-aurora-horizon-1024.avif 1024w, /assets/nasa-aurora-horizon-1440.avif 1440w, /assets/nasa-aurora-horizon-1920.avif 1920w" sizes="100vw" />
+              <source type="image/webp" srcset="/assets/nasa-aurora-horizon-640.webp 640w, /assets/nasa-aurora-horizon-1024.webp 1024w, /assets/nasa-aurora-horizon-1440.webp 1440w, /assets/nasa-aurora-horizon-1920.webp 1920w" sizes="100vw" />
+              <img src="/assets/nasa-aurora-horizon.jpg" alt="" loading="lazy" decoding="async" width="1920" height="1280" />
+            </picture>
+            <span class="scene-caption">NASA / ISS · AURORA OVER THE SOUTHERN HORIZON</span>
+          </div>
+
+          <!-- Central Optical Calibration HUD -->
+          <div class="aperture-core-wrapper">
+            <!-- Concentric SVG Calibration HUD Rings -->
+            <svg class="aperture-svg" viewBox="0 0 600 600">
+              <defs>
+                <linearGradient id="apertureGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                  <stop offset="0%" style="stop-color: var(--accent)" />
+                  <stop offset="50%" style="stop-color: var(--amber)" />
+                  <stop offset="100%" style="stop-color: var(--purple)" />
+                </linearGradient>
+              </defs>
+
+              <!-- Outer Tech Ring -->
+              <circle class="ring ring-outer" cx="300" cy="300" r="280" />
+              <!-- Tick Marks Ring -->
+              <circle class="ring ring-ticks" cx="300" cy="300" r="240" stroke-dasharray="2 12" />
+              <!-- Rotating Segment Ring -->
+              <circle class="ring ring-segments" cx="300" cy="300" r="200" stroke-dasharray="80 30 120 40" />
+              <!-- Dynamic Aperture Iris Blades -->
+              <circle class="ring ring-iris" id="aperture-iris" cx="300" cy="300" r="140" stroke="url(#apertureGrad)" stroke-width="3" />
+              <!-- Center Glow Target -->
+              <circle class="ring ring-inner" cx="300" cy="300" r="80" stroke-dasharray="6 6" />
+              <!-- Crosshairs -->
+              <line x1="300" y1="20" x2="300" y2="120" style="stroke: var(--border-strong)" stroke-width="1.5" />
+              <line x1="300" y1="480" x2="300" y2="580" style="stroke: var(--border-strong)" stroke-width="1.5" />
+              <line x1="20" y1="300" x2="120" y2="300" style="stroke: var(--border-strong)" stroke-width="1.5" />
+              <line x1="480" y1="300" x2="580" y2="300" style="stroke: var(--border-strong)" stroke-width="1.5" />
+            </svg>
+
+            <!-- Real-time Oscilloscope Canvas inside the aperture core -->
+            <div class="aperture-screen">
+              <canvas id="aperture-canvas" width="220" height="220" role="img" aria-label="Live oscilloscope trace of the incoming signal"></canvas>
+              <div class="screen-readout">
+                <div class="readout-title" id="aperture-phase-title">RECEIVING</div>
+                <div class="readout-val" id="aperture-phase-val">SIGNAL: SEARCHING</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 4 Floating Telemetry Wings triggered by scroll milestones -->
+          <div class="aperture-wing wing-tl" id="wing-tl">
+            <span class="wing-tag">QUADRANT 01</span>
+            <h3>NEUROMORPHIC TIMING</h3>
+            <p>128 Billion synaptic spikes/sec processed through sub-threshold bio-silicon gates.</p>
+            <div class="wing-metric"><span class="highlight">128.4</span> B/SEC</div>
+          </div>
+
+          <div class="aperture-wing wing-tr" id="wing-tr">
+            <span class="wing-tag">QUADRANT 02</span>
+            <h3>BYZANTINE CONSENSUS</h3>
+            <p>Fault-tolerant consensus executed at photonic light-speed with zero packet corruption.</p>
+            <div class="wing-metric"><span class="highlight">0.18</span> MS PEER SYNC</div>
+          </div>
+
+          <div class="aperture-wing wing-bl" id="wing-bl">
+            <span class="wing-tag">QUADRANT 03</span>
+            <h3>CRYOGENIC OPTICAL FLUX</h3>
+            <p>Helium-4 superfluid cooling matrix preserving nanosecond quantum coherence states.</p>
+            <div class="wing-metric"><span class="highlight">-269.4</span> °C MARGIN</div>
+          </div>
+
+          <div class="aperture-wing wing-br" id="wing-br">
+            <span class="wing-tag">QUADRANT 04</span>
+            <h3>LATTICE RESISTANCE</h3>
+            <p>Post-quantum lattice cryptographic defense shielding real-time telemetry uplinks.</p>
+            <div class="wing-metric"><span class="highlight">KYBER</span> 1024-BIT</div>
+          </div>
+
+          <!-- Step Progression Milestones at bottom -->
+          <div class="aperture-steps-tracker">
+            <div class="step-indicator active" id="step-1">
+              <span class="step-num">01</span>
+              <span class="step-label">RECEIVE</span>
+            </div>
+            <div class="step-line"><div class="step-line-fill" id="step-fill-1"></div></div>
+            <div class="step-indicator" id="step-2">
+              <span class="step-num">02</span>
+              <span class="step-label">INTERPRET</span>
+            </div>
+            <div class="step-line"><div class="step-line-fill" id="step-fill-2"></div></div>
+            <div class="step-indicator" id="step-3">
+              <span class="step-num">03</span>
+              <span class="step-label">UNDERSTAND</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ==============================================
+           SECTION 03: HORIZONTAL EXHIBIT REEL
+           Pinned viewport with horizontal track translation
+           ============================================== -->
+      <section id="horizontal-section" class="horizontal-scroll-container">
+        <div class="horizontal-sticky-wrapper" id="horizontal-sticky">
+          <div class="horizontal-scene" aria-hidden="true">
+            <picture>
+              <source type="image/avif" srcset="/assets/nasa-solar-array-640.avif 640w, /assets/nasa-solar-array-1024.avif 1024w, /assets/nasa-solar-array-1440.avif 1440w, /assets/nasa-solar-array-1920.avif 1920w" sizes="100vw" />
+              <source type="image/webp" srcset="/assets/nasa-solar-array-640.webp 640w, /assets/nasa-solar-array-1024.webp 1024w, /assets/nasa-solar-array-1440.webp 1440w, /assets/nasa-solar-array-1920.webp 1920w" sizes="100vw" />
+              <img src="/assets/nasa-solar-array.jpg" alt="" loading="lazy" decoding="async" width="1920" height="1311" />
+            </picture>
+            <div class="horizontal-scene-scrim"></div>
+            <span class="scene-caption">NASA / STS-124 · ISS SOLAR ARRAY ABOVE EARTH</span>
+          </div>
+
+          <div class="horizontal-track" id="horizontal-track">
+
+            <!-- Intro Panel -->
+            <div class="exhibit-panel intro-panel">
+              <div class="panel-inner">
+                <div class="badge-pill">CHAPTER 03 // THE INSTRUMENTS</div>
+                <h2 class="exhibit-headline">A BODY FOR<br><span class="gradient-text">THE VOID</span></h2>
+                <p class="exhibit-sub">
+                  Every sense, circuit, and moving part is a way of asking the universe a question. Follow the signal to meet the instruments.
+                </p>
+                <div class="scroll-cue-horizontal">
+                  <span>SCROLL OR SWIPE TO EXPLORE</span>
+                  <div class="h-arrow">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Exhibit 01: Photonic Processor -->
+            <div class="exhibit-panel card-panel">
+              <div class="exhibit-card" data-tilt>
+                <div class="card-media">
+                  <picture>
+                    <source type="image/avif" srcset="/assets/quantum_processor-640.avif 640w, /assets/quantum_processor-1024.avif 1024w, /assets/quantum_processor-1376.avif 1376w" sizes="(max-width: 768px) 92vw, 44vw" />
+                    <source type="image/webp" srcset="/assets/quantum_processor-640.webp 640w, /assets/quantum_processor-1024.webp 1024w, /assets/quantum_processor-1376.webp 1376w" sizes="(max-width: 768px) 92vw, 44vw" />
+                    <img src="/assets/quantum_processor.jpg" alt="Quantum Photonic Processor" loading="lazy" decoding="async" width="1376" height="768" />
+                  </picture>
+                  <div class="media-overlay"></div>
+                  <span class="media-badge">MOD_01 // COGNITIVE</span>
+                </div>
+                <div class="card-body">
+                  <div class="card-meta">
+                    <span class="meta-tag">OPTICAL HYBRID</span>
+                    <span class="meta-status">ACTIVE</span>
+                  </div>
+                  <h3 class="card-name">PHOTONIC PROCESSOR</h3>
+                  <p class="card-desc">
+                    A speculative photonic-computing concept, illustrated through an original processor visualization.
+                  </p>
+                  <div class="card-spec-grid">
+                    <div class="spec-item">
+                      <span class="spec-label">THROUGHPUT</span>
+                      <span class="spec-val">14.8 PFLOPS</span>
+                    </div>
+                    <div class="spec-item">
+                      <span class="spec-label">EFFICIENCY</span>
+                      <span class="spec-val">0.02 W/TFLOPS</span>
+                    </div>
+                    <div class="spec-item">
+                      <span class="spec-label">COHERENCE</span>
+                      <span class="spec-val">99.994%</span>
+                    </div>
+                  </div>
+                  <!-- Interactive card control -->
+                  <div class="card-interactive-bar">
+                    <label>OPTICAL FLUX BIAS</label>
+                    <input type="range" min="10" max="100" value="85" class="spec-slider" data-target="flux-val-1" />
+                    <span class="slider-val" id="flux-val-1">85% OPTIMAL</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Exhibit 02: Orbital Deep-Space Station -->
+            <div class="exhibit-panel card-panel">
+              <div class="exhibit-card" data-tilt>
+                <div class="card-media">
+                  <picture>
+                    <source type="image/avif" srcset="/assets/nasa-iss-exterior-640.avif 640w, /assets/nasa-iss-exterior-1024.avif 1024w, /assets/nasa-iss-exterior-1440.avif 1440w, /assets/nasa-iss-exterior-1920.avif 1920w" sizes="(max-width: 768px) 92vw, 44vw" />
+                    <source type="image/webp" srcset="/assets/nasa-iss-exterior-640.webp 640w, /assets/nasa-iss-exterior-1024.webp 1024w, /assets/nasa-iss-exterior-1440.webp 1440w, /assets/nasa-iss-exterior-1920.webp 1920w" sizes="(max-width: 768px) 92vw, 44vw" />
+                    <img src="/assets/nasa-iss-exterior.jpg" alt="The International Space Station above Earth, photographed from Space Shuttle Atlantis" loading="lazy" decoding="async" width="1920" height="1879" />
+                  </picture>
+                  <div class="media-overlay"></div>
+                  <span class="media-badge">NASA · STS-106 · ISS</span>
+                </div>
+                <div class="card-body">
+                  <div class="card-meta">
+                    <span class="meta-tag">LEO SATELLITE HUB</span>
+                    <span class="meta-status">ORBITING</span>
+                  </div>
+                  <h3 class="card-name">THE STATION, AS IT IS</h3>
+                  <p class="card-desc">
+                    A true-to-life view of the International Space Station against Earth’s horizon, photographed from Atlantis during STS-106.
+                  </p>
+                  <div class="card-spec-grid">
+                    <div class="spec-item"><span class="spec-label">MISSION</span><span class="spec-val">STS-106</span></div>
+                    <div class="spec-item"><span class="spec-label">SUBJECT</span><span class="spec-val">ISS IN ORBIT</span></div>
+                    <div class="spec-item"><span class="spec-label">SOURCE</span><span class="spec-val">NASA / JSC</span></div>
+                  </div>
+                  <div class="card-interactive-action">
+                    <button class="card-action-btn" data-beacon="orbital">
+                      <span class="pulse-dot"></span>
+                      <span>TRACE THIS ORBIT</span>
+                    </button>
+                    <span class="beacon-feedback">NASA IMAGE</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Exhibit 03: Synaptic Mesh Network -->
+            <div class="exhibit-panel card-panel">
+              <div class="exhibit-card" data-tilt>
+                <div class="card-media">
+                  <img src="/assets/signal-field.svg" alt="An abstract orbital signal-network illustration created for this field study" loading="lazy" />
+                  <div class="media-overlay"></div>
+                  <span class="media-badge">AETHER FIELD STUDY · 01</span>
+                </div>
+                <div class="card-body">
+                  <div class="card-meta">
+                    <span class="meta-tag">DECENTRALIZED MESH</span>
+                    <span class="meta-status">ILLUSTRATION</span>
+                  </div>
+                  <h3 class="card-name">SYNAPTIC MESH NETWORK</h3>
+                  <p class="card-desc">
+                    Self-healing dynamic routing network connecting 1.4 Trillion nodes with automatic packet rerouting during cosmic flares.
+                  </p>
+                  <div class="card-spec-grid">
+                    <div class="spec-item">
+                      <span class="spec-label">TOTAL NODES</span>
+                      <span class="spec-val">1.42 TRILLION</span>
+                    </div>
+                    <div class="spec-item">
+                      <span class="spec-label">TOPOLOGY</span>
+                      <span class="spec-val">N-DIMENSIONAL</span>
+                    </div>
+                    <div class="spec-item">
+                      <span class="spec-label">PACKET LOSS</span>
+                      <span class="spec-val">0.00001%</span>
+                    </div>
+                  </div>
+                  <div class="card-interactive-action">
+                    <button class="card-action-btn" data-beacon="mesh">
+                      <span class="pulse-dot"></span>
+                      <span>TRIGGER HEALING TEST</span>
+                    </button>
+                    <span class="beacon-feedback">STABLE</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Exhibit 04: ISS solar array -->
+            <div class="exhibit-panel card-panel">
+              <div class="exhibit-card" data-tilt>
+                <div class="card-media">
+                  <picture>
+                    <source type="image/avif" srcset="/assets/nasa-solar-array-640.avif 640w, /assets/nasa-solar-array-1024.avif 1024w, /assets/nasa-solar-array-1440.avif 1440w, /assets/nasa-solar-array-1920.avif 1920w" sizes="(max-width: 768px) 92vw, 44vw" />
+                    <source type="image/webp" srcset="/assets/nasa-solar-array-640.webp 640w, /assets/nasa-solar-array-1024.webp 1024w, /assets/nasa-solar-array-1440.webp 1440w, /assets/nasa-solar-array-1920.webp 1920w" sizes="(max-width: 768px) 92vw, 44vw" />
+                    <img src="/assets/nasa-solar-array.jpg" alt="International Space Station solar array panels above the blue Earth" loading="lazy" decoding="async" width="1920" height="1311" />
+                  </picture>
+                  <div class="media-overlay"></div>
+                  <span class="media-badge">NASA · STS-124 · SOLAR ARRAY</span>
+                </div>
+                <div class="card-body">
+                  <div class="card-meta">
+                    <span class="meta-tag">ORBITAL POWER</span>
+                    <span class="meta-status">IN SERVICE</span>
+                  </div>
+                  <h3 class="card-name">SOLAR ARRAY WINGS</h3>
+                  <p class="card-desc">
+                    Expansive photovoltaic wings provide the station with power as it circles Earth. A real view of orbital infrastructure, captured during shuttle mission STS-124.
+                  </p>
+                  <div class="card-spec-grid">
+                    <div class="spec-item"><span class="spec-label">MISSION</span><span class="spec-val">STS-124</span></div>
+                    <div class="spec-item"><span class="spec-label">SUBJECT</span><span class="spec-val">ISS SOLAR ARRAY</span></div>
+                    <div class="spec-item"><span class="spec-label">SOURCE</span><span class="spec-val">NASA / JSC</span></div>
+                  </div>
+                  <div class="card-interactive-action">
+                    <button class="card-action-btn" data-beacon="array"><span class="pulse-dot"></span><span>TRACE THE ORBIT</span></button>
+                    <span class="beacon-feedback">IMAGE VERIFIED</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Exhibit 05: Neural mesh constellation -->
+            <div class="exhibit-panel card-panel">
+              <div class="exhibit-card" data-tilt>
+                <div class="card-media">
+                  <picture>
+                    <source type="image/avif" srcset="/assets/neural_mesh-640.avif 640w, /assets/neural_mesh-1024.avif 1024w, /assets/neural_mesh-1376.avif 1376w" sizes="(max-width: 768px) 92vw, 44vw" />
+                    <source type="image/webp" srcset="/assets/neural_mesh-640.webp 640w, /assets/neural_mesh-1024.webp 1024w, /assets/neural_mesh-1376.webp 1376w" sizes="(max-width: 768px) 92vw, 44vw" />
+                    <img src="/assets/neural_mesh.jpg" alt="A luminous network of neural nodes connected across deep space" loading="lazy" decoding="async" width="1376" height="768" />
+                  </picture>
+                  <div class="media-overlay"></div>
+                  <span class="media-badge">MOD_05 // NEURAL MESH</span>
+                </div>
+                <div class="card-body">
+                  <div class="card-meta">
+                    <span class="meta-tag">SELF-HEALING TOPOLOGY</span>
+                    <span class="meta-status">SIMULATION</span>
+                  </div>
+                  <h3 class="card-name">A SIGNAL CONSTELLATION</h3>
+                  <p class="card-desc">
+                    An original, illustrative signal network: nodes cross the dark, find one another, and form a path home.
+                  </p>
+                  <div class="card-spec-grid">
+                    <div class="spec-item"><span class="spec-label">NODES</span><span class="spec-val">CONNECTED</span></div>
+                    <div class="spec-item"><span class="spec-label">TOPOLOGY</span><span class="spec-val">ADAPTIVE</span></div>
+                    <div class="spec-item"><span class="spec-label">STATUS</span><span class="spec-val">SIMULATED</span></div>
+                  </div>
+                  <div class="card-interactive-action">
+                    <button class="card-action-btn" data-beacon="constellation">
+                      <span class="pulse-dot"></span>
+                      <span>TRACE THIS SIGNAL</span>
+                    </button>
+                    <span class="beacon-feedback">LISTENING</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+          </div>
+
+          <!-- Floating Prev/Next Track Controls -->
+          <button class="h-nav-arrow h-nav-prev" id="h-prev-btn" aria-label="Previous card" data-cursor="PREV">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="15 18 9 12 15 6"></polyline></svg>
+          </button>
+          <button class="h-nav-arrow h-nav-next" id="h-next-btn" aria-label="Next card" data-cursor="NEXT">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="9 18 15 12 9 6"></polyline></svg>
+          </button>
+
+          <!-- Horizontal Progress Meter & Clickable Pips -->
+          <div class="horizontal-meter">
+            <span class="meter-text">TRAVERSAL METRIC</span>
+            <div class="card-pips">
+              <button class="pip-btn active" data-index="0" title="Intro" aria-label="Go to 00, Intro">00</button>
+              <button class="pip-btn" data-index="1" title="Photonic Processor" aria-label="Go to 01, Photonic Processor">01</button>
+              <button class="pip-btn" data-index="2" title="Orbital Hub" aria-label="Go to 02, Orbital Hub">02</button>
+              <button class="pip-btn" data-index="3" title="Synaptic Mesh" aria-label="Go to 03, Synaptic Mesh">03</button>
+              <button class="pip-btn" data-index="4" title="Kinetic Actuator" aria-label="Go to 04, Kinetic Actuator">04</button>
+              <button class="pip-btn" data-index="5" title="Signal constellation" aria-label="Go to 05, Signal constellation">05</button>
+            </div>
+            <div class="meter-bar"><div class="meter-fill" id="horizontal-meter-fill"></div></div>
+            <span class="meter-val" id="horizontal-meter-val">01 / 05</span>
+          </div>
+
+        </div>
+      </section>
+
+      <!-- ==============================================
+           SECTION 04: 3D STACKING ARCHITECTURE DECK
+           Cards pin and smoothly stack over each other
+           ============================================== -->
+      <section id="stack-section" class="stack-container">
+        <div class="stack-intro">
+          <div class="badge-pill">CHAPTER 04 // THE INNER LIFE</div>
+          <h2 class="stack-headline">A MIND IN<br><span class="gradient-text">THREE LAYERS</span></h2>
+          <p class="stack-sub">
+            Sensing, understanding, acting. Three interwoven layers turn distant starlight into a choice, and a choice into motion.
+          </p>
+        </div>
+
+        <div class="stack-deck">
+          <!-- Card 1 -->
+          <div class="stack-card card-tier-1" id="stack-card-1">
+            <div class="card-tier-indicator">01</div>
+            <div class="card-tier-content">
+              <span class="tier-tag">STRATA 01 // SENSORY PERCEPTION</span>
+              <h3 class="tier-title">PERCEPTION SYNAPSE</h3>
+              <p class="tier-desc">
+                High-bandwidth sensory ingestion layer harmonizing multi-spectral optical feeds,
+                solid-state LiDAR streams, and quantum magnetometers into a unified 4D world representation.
+              </p>
+              <ul class="tier-features">
+                <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none" style="stroke: var(--accent)" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg> 2.4 Terabytes/sec raw telemetry streaming</li>
+                <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none" style="stroke: var(--accent)" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg> Dynamic point cloud compression at 99.4% ratio</li>
+                <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none" style="stroke: var(--accent)" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg> Real-time cosmic radiation noise cancellation</li>
+              </ul>
+            </div>
+            <div class="tier-graphics">
+              <div class="radar-visual">
+                <div class="radar-sweep"></div>
+                <div class="radar-blip blip-1"></div>
+                <div class="radar-blip blip-2"></div>
+                <div class="radar-blip blip-3"></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Card 2 -->
+          <div class="stack-card card-tier-2" id="stack-card-2">
+            <div class="card-tier-indicator">02</div>
+            <div class="card-tier-content">
+              <span class="tier-tag">STRATA 02 // DISTRIBUTED CONSENSUS</span>
+              <h3 class="tier-title">COGNITIVE RUNTIME</h3>
+              <p class="tier-desc">
+                Distributed graph orchestrator executing asynchronous neural inference. Resolves decision-making
+                conflicts across thousands of orbital nodes in under 200 microseconds.
+              </p>
+              <ul class="tier-features">
+                <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none" style="stroke: var(--purple)" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg> Byzantine fault tolerance without planetary latency</li>
+                <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none" style="stroke: var(--purple)" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg> Adaptive weight recalculation on micro-drift events</li>
+                <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none" style="stroke: var(--purple)" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg> Immutable cryptographic audit ledger</li>
+              </ul>
+            </div>
+            <div class="tier-graphics">
+              <div class="consensus-visual">
+                <div class="c-node c-node-center"></div>
+                <div class="c-node c-node-1"></div>
+                <div class="c-node c-node-2"></div>
+                <div class="c-node c-node-3"></div>
+                <div class="c-node c-node-4"></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Card 3 -->
+          <div class="stack-card card-tier-3" id="stack-card-3">
+            <div class="card-tier-indicator">03</div>
+            <div class="card-tier-content">
+              <span class="tier-tag">STRATA 03 // PHYSICAL REALIZATION</span>
+              <h3 class="tier-title">ACTUATION VECTOR</h3>
+              <p class="tier-desc">
+                Physical execution framework interfacing neural commands directly into micro-thrusters,
+                solar articulation joints, and optical alignment lasers with zero command jitter.
+              </p>
+              <ul class="tier-features">
+                <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none" style="stroke: var(--magenta)" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg> Sub-millisecond motor control loop with predictive dampening</li>
+                <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none" style="stroke: var(--magenta)" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg> Inertial compensation across 6 degrees of freedom</li>
+                <li><svg width="16" height="16" viewBox="0 0 24 24" fill="none" style="stroke: var(--magenta)" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg> Autonomous orbital collision avoidance protocol</li>
+              </ul>
+            </div>
+            <div class="tier-graphics">
+              <div class="actuation-visual">
+                <div class="actuator-ring"></div>
+                <div class="actuator-core"></div>
+                <div class="vector-line line-x"></div>
+                <div class="vector-line line-y"></div>
+                <div class="vector-line line-z"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ==============================================
+           SECTION 05: KINETIC TELEMETRY COUNTERS
+           Numbers count up smoothly when scrolled into view
+           ============================================== -->
+      <section id="telemetry-section" class="scroll-section telemetry-section">
+        <div class="telemetry-inner">
+          <div class="telemetry-header">
+            <div class="signal-chapter-scene" aria-hidden="true"><picture><source type="image/avif" srcset="/assets/nasa-aurora-horizon-640.avif 640w, /assets/nasa-aurora-horizon-1024.avif 1024w, /assets/nasa-aurora-horizon-1440.avif 1440w, /assets/nasa-aurora-horizon-1920.avif 1920w" sizes="100vw" /><source type="image/webp" srcset="/assets/nasa-aurora-horizon-640.webp 640w, /assets/nasa-aurora-horizon-1024.webp 1024w, /assets/nasa-aurora-horizon-1440.webp 1440w, /assets/nasa-aurora-horizon-1920.webp 1920w" sizes="100vw" /><img src="/assets/nasa-aurora-horizon.jpg" alt="" loading="lazy" decoding="async" width="1920" height="1280" /></picture><div class="signal-chapter-scrim"></div><span class="scene-caption">ISS 74 · AURORA AUSTRALIS · APR 2026</span></div>
+            <div class="badge-pill">CHAPTER 05 // DISTANT PULSE</div>
+            <h2 class="telemetry-headline">THE DISTANCE<br><span class="gradient-text">BETWEEN STARS</span></h2>
+            <p class="telemetry-sub">A heartbeat at the edge of the known. See what it takes to keep a signal alive, light-years from home.</p>
+            <p class="concept-note">Illustrative readings from a speculative system. This is a field study, not live telemetry.</p>
+
+            <!-- Interactive Performance Mode Switch -->
+            <div class="mode-switch-group" role="group" aria-label="Interface color theme">
+              <span class="mode-label">PALETTE:</span>
+              <button class="mode-btn active" data-mode="midnight" aria-pressed="true">MIDNIGHT</button>
+              <button class="mode-btn" data-mode="ember" aria-pressed="false">EMBER</button>
+              <button class="mode-btn" data-mode="polar" aria-pressed="false">POLAR</button>
+              <button class="mode-btn" data-mode="daylight" aria-pressed="false">DAYLIGHT</button>
+            </div>
+          </div>
+
+          <!-- Counter Cards Grid -->
+          <div class="counter-grid">
+            <div class="counter-card" data-tilt>
+              <div class="counter-header">
+                <span class="counter-tag">SIGNAL STRENGTH</span>
+                <span class="counter-status">SIMULATED</span>
+              </div>
+              <div class="counter-display">
+                <span class="counter-val" data-target="99.8" data-decimals="1">0.0</span>
+                <span class="counter-unit">%</span>
+              </div>
+              <p class="counter-desc">A simulated connection quality indicator in this speculative field study.</p>
+              <div class="meter-track"><div class="meter-progress" style="width: 99%;"></div></div>
+            </div>
+
+            <div class="counter-card" data-tilt>
+              <div class="counter-header">
+                <span class="counter-tag">ROUND-TRIP DELAY</span>
+                <span class="counter-status">FICTIONAL</span>
+              </div>
+              <div class="counter-display">
+                <span class="counter-val" data-target="0.42" data-decimals="2">0.00</span>
+                <span class="counter-unit">S</span>
+              </div>
+              <p class="counter-desc">A fictional transmission delay for a message making an impossible return journey.</p>
+              <div class="meter-track"><div class="meter-progress" style="width: 88%;"></div></div>
+            </div>
+
+            <div class="counter-card" data-tilt>
+              <div class="counter-header">
+                <span class="counter-tag">SIGNAL BANDWIDTH</span>
+                <span class="counter-status">FICTIONAL</span>
+              </div>
+              <div class="counter-display">
+                <span class="counter-val" data-target="18.6" data-decimals="1">0.0</span>
+                <span class="counter-unit">Gbps</span>
+              </div>
+              <p class="counter-desc">A fictional bandwidth figure for the imagined link between distant relays.</p>
+              <div class="meter-track"><div class="meter-progress" style="width: 94%;"></div></div>
+            </div>
+
+            <div class="counter-card" data-tilt>
+              <div class="counter-header">
+                <span class="counter-tag">LISTENING NODES</span>
+                <span class="counter-status">ILLUSTRATIVE</span>
+              </div>
+              <div class="counter-display">
+                <span class="counter-val" data-target="128" data-decimals="0">0</span>
+                <span class="counter-unit">NODES</span>
+              </div>
+              <p class="counter-desc">A purely illustrative count, standing in for the idea of listening minds in many places.</p>
+              <div class="meter-track"><div class="meter-progress" style="width: 100%;"></div></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ==============================================
+           SECTION 06: INTERACTIVE SCI-FI TERMINAL
+           Direct user engagement with commands & audio
+           ============================================== -->
+      <section id="console-section" class="scroll-section console-section">
+        <div class="console-wrapper">
+          <div class="console-header-block">
+            <div class="badge-pill">CHAPTER 06 // A MESSAGE IN THE DARK</div>
+            <h2 class="console-headline">LEAVE A<br><span class="gradient-text">FIELD RECORDING</span></h2>
+            <p class="console-sub">The system is listening. Ask what it sees, or send it toward the signal.</p>
+          </div>
+
+          <div class="terminal-window">
+            <div class="terminal-chrome">
+              <div class="terminal-dots">
+                <span class="dot dot-red"></span>
+                <span class="dot dot-yellow"></span>
+                <span class="dot dot-green"></span>
+              </div>
+              <div class="terminal-title">FIELD_RECORDER // LIVE LINK</div>
+              <div class="terminal-actions">
+                <span class="terminal-badge">SIMULATION</span>
+              </div>
+            </div>
+
+            <div class="terminal-output" id="terminal-output" role="log" aria-live="polite" aria-relevant="additions text"></div>
+
+            <div class="terminal-input-row">
+              <span class="prompt-symbol">USER@AETHER:~$</span>
+              <input type="text" class="terminal-input" aria-label="Enter a field recorder command" placeholder="Try 'help' or choose a command below…" spellcheck="false" autocomplete="off" />
+            </div>
+
+            <div class="terminal-chip-bar">
+              <span class="chip-label">QUICK MACROS:</span>
+              <button class="command-chip" data-cmd="status">status</button>
+              <button class="command-chip" data-cmd="diagnostics">diagnostics</button>
+              <button class="command-chip" data-cmd="warp">warp</button>
+              <button class="command-chip" data-cmd="overclock">overclock</button>
+              <button class="command-chip" data-cmd="clear">clear</button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ==============================================
+           SECTION 07: FINALE CTA & HYPERDRIVE WARP
+           Warp speed visualizer and interactive climax
+           ============================================== -->
+      <section id="cta-section" class="scroll-section cta-section">
+        <div class="cta-inner">
+          <div class="badge-pill">LAST CHAPTER // A NEW HORIZON</div>
+          <div class="finale-nebula" aria-hidden="true"><picture><source type="image/avif" srcset="/assets/nasa-carina-nebula-640.avif 640w, /assets/nasa-carina-nebula-1024.avif 1024w, /assets/nasa-carina-nebula-1440.avif 1440w, /assets/nasa-carina-nebula-1920.avif 1920w" sizes="100vw" /><source type="image/webp" srcset="/assets/nasa-carina-nebula-640.webp 640w, /assets/nasa-carina-nebula-1024.webp 1024w, /assets/nasa-carina-nebula-1440.webp 1440w, /assets/nasa-carina-nebula-1920.webp 1920w" sizes="100vw" /><img src="/assets/nasa-carina-nebula.jpg" alt="" loading="lazy" decoding="async" width="1920" height="1111" /></picture><span class="scene-caption">NGC 3324 · CARINA NEBULA · JWST</span></div>
+
+          <h2 class="cta-headline">
+            CARRY THE<br>
+            <span class="gradient-text">SIGNAL ON.</span>
+          </h2>
+
+          <p class="cta-desc">
+            The next era of computing transcends planetary boundaries.
+            Send a signal toward the Aether constellation. Somewhere, it is listening.
+          </p>
+
+          <div class="cta-actions">
+            <button id="warp-btn" class="btn btn-warp" data-cursor="WARP!">
+              <span class="warp-glow"></span>
+              <span class="btn-text">SEND A SIGNAL</span>
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+            </button>
+          </div>
+
+          <div class="warp-status-panel" id="warp-status-panel" aria-live="polite">
+            <div class="panel-row">
+              <span>OUTBOUND BEACON:</span>
+              <span class="text-accent" id="warp-engine-status">BEACON // STANDBY</span>
+            </div>
+            <div class="panel-row">
+              <span>TARGET VECTOR:</span>
+              <span>PROXIMA CENTAURI · 4.24 LIGHT-YEARS</span>
+            </div>
+          </div>
+
+          <!-- Footer System Information -->
+          <footer class="site-footer">
+            <div class="footer-grid">
+              <div class="footer-col brand-col">
+                <div class="logo-title">AETHER <span class="footer-mark">/ FIELD NOTES</span></div>
+                <p>A speculative field guide to intelligence, connection, and the long way home.</p>
+                <div class="system-time" id="system-live-time">UTC: 2026.10.17 // 04:32:00</div>
+                <div class="asset-credit">
+                  NASA imagery · <a href="https://images.nasa.gov/details/iss071e581260_alt" target="_blank" rel="noreferrer">Earthset, ISS Expedition 71</a> · <a href="https://images.nasa.gov/details/sts106-712-028" target="_blank" rel="noreferrer">ISS, STS-106</a> · <a href="https://images.nasa.gov/details/s124e008622" target="_blank" rel="noreferrer">Solar arrays, STS-124</a> · <a href="https://images.nasa.gov/details/iss074e0504006" target="_blank" rel="noreferrer">Aurora, Expedition 74</a> · <a href="https://images.nasa.gov/details/carina_nebula" target="_blank" rel="noreferrer">Carina Nebula, Webb</a>.
+                </div>
+              </div>
+
+              <div class="footer-col">
+                <h3>NAVIGATION</h3>
+                <ul>
+                  <li><a href="#hero">Origin signal</a></li>
+                  <li><a href="#aperture-section">First contact</a></li>
+                  <li><a href="#horizontal-section">Instruments</a></li>
+                  <li><a href="#stack-section">Inner life</a></li>
+                  <li><a href="#telemetry-section">Distant pulse</a></li>
+                </ul>
+              </div>
+
+              <div class="footer-col">
+                <h3>SPECIFICATIONS</h3>
+                <ul>
+                  <li><a href="#console-section">Field recorder</a></li>
+                  <li><a href="#telemetry-section">Light-year signal</a></li>
+                  <li><a href="#aperture-section">Perception array</a></li>
+                  <li><a href="#horizontal-section">Neural constellation</a></li>
+                </ul>
+              </div>
+
+              <div class="footer-col back-to-top-col">
+                <button id="back-to-top" class="btn btn-secondary" data-cursor="TOP">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 19V5M5 12l7-7 7 7"/></svg>
+                  <span>BACK TO THE BEGINNING</span>
+                </button>
+                <div class="shortcut-tip">SPACE · TOGGLE AMBIENT AUDIO</div>
+              </div>
+            </div>
+
+            <div class="footer-bottom">
+              <div class="copyright">© 2026 AETHER FIELD NOTES. SIGNAL RECEIVED.</div>
+              <div class="coordinates">LOCATION: DEEP SPACE // DISTANCE: 4.24 LIGHT-YEARS</div>
+            </div>
+          </footer>
+        </div>
+      </section>
+
+    </main>
+
+    <!-- App Scripts -->
+    <script type="module" src="/src/main.js"></script>
+    <!-- ==============================================
+         SIGNAL SPACE — immersive world opened by SEND A SIGNAL
+         ============================================== -->
+    <div id="warp-world" class="warp-world" role="dialog" aria-modal="true" aria-label="Signal Space, an immersive view of deep space" hidden>
+      <canvas id="warp-canvas" aria-hidden="true"></canvas>
+      <div class="warp-vignette" aria-hidden="true"></div>
+
+      <div class="warp-hud">
+        <div class="warp-hud-row warp-hud-top">
+          <div class="warp-hud-tag"><span class="status-dot pulse"></span> SIGNAL SPACE // SECTOR 7G</div>
+          <div class="warp-hud-tag dim" id="warp-coords">RA 17.00h · DEC -29.00°</div>
+        </div>
+
+        <div class="warp-reticle" aria-hidden="true">
+          <span class="reticle-ring"></span>
+          <span class="reticle-dot"></span>
+        </div>
+
+        <div class="warp-hud-row warp-hud-bottom">
+          <div class="warp-readouts">
+            <div class="warp-readout"><span class="k">VELOCITY</span><span class="v" id="warp-vel">0.000c</span></div>
+            <div class="warp-readout"><span class="k">DISTANCE</span><span class="v" id="warp-dist">0.0000 AU</span></div>
+            <div class="warp-readout"><span class="k">SIGNAL</span><span class="v accent" id="warp-sig">LOCKED 72%</span></div>
+          </div>
+          <p class="warp-hint">DRAG TO LOOK · SCROLL TO TRAVEL · ESC TO RETURN</p>
+          <button id="warp-exit" class="warp-exit" type="button" data-cursor="EXIT">RETURN TO SURFACE</button>
+        </div>
+      </div>
+    </div>
+
+  </body>
+</html>
