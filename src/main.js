@@ -27,6 +27,13 @@ class AetherApp {
     document.body.classList.toggle('reduced-motion', this.reducedMotion);
     this.mqMobile = window.matchMedia('(max-width: 768px)');
     this.mqStackDesktop = window.matchMedia('(max-width: 1024px)');
+    // Reading MediaQueryList.matches forces a style/layout flush when styles
+    // are dirty, which is exactly the state a scroll frame leaves behind.
+    // Cache the result and refresh it only when the query actually changes.
+    this.isMobile = this.mqMobile.matches;
+    this.isStackDesktop = this.mqStackDesktop.matches;
+    this.mqMobile.addEventListener('change', (e) => { this.isMobile = e.matches; });
+    this.mqStackDesktop.addEventListener('change', (e) => { this.isStackDesktop = e.matches; });
     this.nativeScrollHandler = () =>
       this.onScroll(window.scrollY, document.documentElement.scrollHeight - window.innerHeight);
     this.nativeScrollAttached = false;
@@ -63,6 +70,7 @@ class AetherApp {
     this.setupCursor();
     this.setupHeaderHUD();
     this.setupReveal();
+    this.setupAnimationPausing();
     this.setupApertureOscilloscope();
     this.observeCanvasVisibility();
     this.setupHorizontalTrack();
@@ -91,6 +99,8 @@ class AetherApp {
       this.maxScroll = document.documentElement.scrollHeight - window.innerHeight;
       clearTimeout(resizeTimer);
       resizeTimer = setTimeout(() => {
+        this.isMobile = this.mqMobile.matches;
+        this.isStackDesktop = this.mqStackDesktop.matches;
         this.refreshMetrics();
         this.sizeApertureCanvas();
         this.onScroll(window.scrollY, document.documentElement.scrollHeight - window.innerHeight);
@@ -171,6 +181,19 @@ class AetherApp {
       map.set(id, { top: el.offsetTop, height: el.offsetHeight });
     });
     this.metrics.sections = map;
+
+    // The stack cards are sticky, so their position during scroll is derived
+    // from their document offset. Caching it here removes three
+    // getBoundingClientRect() calls per frame (a measured hot spot).
+    const scrollY = window.scrollY || 0;
+    const cards = this.els.stackCards || [];
+    this.stackCardTops = cards.map((card) =>
+      card ? card.getBoundingClientRect().top + scrollY : null
+    );
+    this.stackStickyTop = cards[0]
+      ? parseFloat(getComputedStyle(cards[0]).top) || 120
+      : 120;
+    this.lastStackScales = [null, null, null];
   }
 
   sectionMetric(id) {
@@ -293,6 +316,36 @@ class AetherApp {
     const reveal = () => this.backdropElement.classList.add('is-ready');
     if (this.backdropImage.complete && this.backdropImage.naturalWidth) reveal();
     else this.backdropImage.addEventListener('load', reveal, { once: true });
+
+    this.preloadBackdrops();
+  }
+
+  // Chapter backdrops swap as the visitor scrolls. Fetching and decoding a
+  // full-bleed AVIF at that moment blocked the main thread for up to ~650ms
+  // (measured), right when the chapter arrives. Warm every variant while the
+  // page is idle instead; the swap then comes straight from the image cache.
+  preloadBackdrops() {
+    const bases = [
+      'nasa-earth-horizon',
+      'nasa-aurora-horizon',
+      'nasa-iss-exterior',
+      'nasa-solar-array',
+      'nasa-carina-nebula',
+    ];
+
+    const warm = () => {
+      const width = this.backdropWidthFor(window.innerWidth, window.devicePixelRatio || 1);
+      bases.forEach((base) => {
+        const img = new Image();
+        img.decoding = 'async';
+        img.src = `/assets/${base}-${width}.avif`;
+        // decode() resolves once the bitmap is ready to paint.
+        if (typeof img.decode === 'function') img.decode().catch(() => {});
+      });
+    };
+
+    if ('requestIdleCallback' in window) requestIdleCallback(warm, { timeout: 2500 });
+    else setTimeout(warm, 1500);
   }
 
   // Mirrors how the browser picks a candidate from a srcset so the preloaded
@@ -376,24 +429,40 @@ class AetherApp {
     let mouseY = window.innerHeight / 2;
     let ringX = mouseX;
     let ringY = mouseY;
+    let rafId = null;
+
+    // The spring only needs frames while it is actually catching up. Running a
+    // permanent rAF loop wrote a transform every frame forever, which kept
+    // style recalculation hot even when the page was completely idle.
+    const settle = () => {
+      const dx = mouseX - ringX;
+      const dy = mouseY - ringY;
+      if (Math.abs(dx) < 0.12 && Math.abs(dy) < 0.12) {
+        ringX = mouseX;
+        ringY = mouseY;
+        ring.style.transform = `translate3d(${ringX}px, ${ringY}px, 0) translate(-50%, -50%)`;
+        rafId = null;
+        return;
+      }
+      ringX += dx * 0.15;
+      ringY += dy * 0.15;
+      ring.style.transform = `translate3d(${ringX}px, ${ringY}px, 0) translate(-50%, -50%)`;
+      rafId = requestAnimationFrame(settle);
+    };
+
+    const followPointer = () => {
+      if (rafId === null) rafId = requestAnimationFrame(settle);
+    };
+
+    // A custom cursor only makes sense for a precise pointer with motion allowed.
+    if (this.reducedMotion || !window.matchMedia('(hover: hover) and (pointer: fine)').matches) return;
 
     window.addEventListener('mousemove', (e) => {
       mouseX = e.clientX;
       mouseY = e.clientY;
-
-      dot.style.transform = `translate(${mouseX}px, ${mouseY}px) translate(-50%, -50%)`;
-    });
-
-    // Smooth spring follow for outer ring
-    const renderCursor = () => {
-      ringX += (mouseX - ringX) * 0.15;
-      ringY += (mouseY - ringY) * 0.15;
-      ring.style.transform = `translate(${ringX}px, ${ringY}px) translate(-50%, -50%)`;
-      requestAnimationFrame(renderCursor);
-    };
-    if (!this.reducedMotion && window.matchMedia('(hover: hover) and (pointer: fine)').matches) {
-      requestAnimationFrame(renderCursor);
-    }
+      dot.style.transform = `translate3d(${mouseX}px, ${mouseY}px, 0) translate(-50%, -50%)`;
+      followPointer();
+    }, { passive: true });
 
     // Hover interactions
     const interactiveElements = document.querySelectorAll('a, button, input, [data-cursor]');
@@ -449,6 +518,33 @@ class AetherApp {
     document.addEventListener('visibilitychange', () => sound.setPageHidden(document.hidden));
   }
 
+  // Chrome recalculates style for every running CSS animation on every frame,
+  // even for transform/opacity. Most of this page's ambient animation lives in
+  // sections that are off screen, so pause those.
+  //
+  // Pausing is applied to the animated element itself rather than to a section
+  // subtree: a wildcard (.paused *) selector invalidates every descendant on
+  // each toggle, which measured worse than leaving the animations running.
+  setupAnimationPausing() {
+    if (this.reducedMotion || !('IntersectionObserver' in window)) return;
+    if (typeof document.getAnimations !== 'function') return;
+
+    const targets = new Set();
+    for (const animation of document.getAnimations()) {
+      const el = animation.effect && animation.effect.target;
+      if (el && el.nodeType === 1) targets.add(el);
+    }
+    if (!targets.size) return;
+
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach((entry) => {
+        entry.target.style.animationPlayState = entry.isIntersecting ? '' : 'paused';
+      });
+    }, { rootMargin: '150px 0px' });
+
+    targets.forEach((el) => observer.observe(el));
+  }
+
   setupReveal() {
     const revealItems = document.querySelectorAll(
       '.hero-eyebrow, .hero-title, .hero-description, .hero-actions, .hero-widgets, .scroll-prompt, .aperture-header, .aperture-core-wrapper, .stack-intro, .stack-card, .telemetry-header, .counter-card, .console-header-block, .terminal-window, .cta-inner > .badge-pill, .cta-headline, .cta-desc, .cta-actions'
@@ -494,14 +590,20 @@ class AetherApp {
 
     this.updatePhotoBackdrop(scroll);
 
-    // Top progress bar
+    // Top progress bar — write only when the value actually changes. Setting
+    // these every frame forced a style recalc 60x/second for no visual gain.
     const pct = Math.round(this.scrollProgress * 100);
-    if (this.els.progressBar) this.els.progressBar.style.width = `${pct}%`;
-    if (this.els.percentageTag) this.els.percentageTag.textContent = `${pct.toString().padStart(2, '0')}%`;
+    if (pct !== this.lastPct) {
+      this.lastPct = pct;
+      if (this.els.progressBar) this.els.progressBar.style.width = `${pct}%`;
+      if (this.els.percentageTag) this.els.percentageTag.textContent = `${pct.toString().padStart(2, '0')}%`;
+    }
 
     // Velocity readout
-    if (this.els.velocityVal) {
-      this.els.velocityVal.textContent = `${Math.abs(Math.round(this.scrollVelocity * 10))}`;
+    const velocity = Math.abs(Math.round(this.scrollVelocity * 10));
+    if (velocity !== this.lastVelocity) {
+      this.lastVelocity = velocity;
+      if (this.els.velocityVal) this.els.velocityVal.textContent = `${velocity}`;
     }
 
     // Section ScrollSpy
@@ -566,7 +668,13 @@ class AetherApp {
 
     const heroHeight = window.innerHeight * 1.4;
     const p = Math.min(1, Math.max(0, scroll / heroHeight));
-    const compact = this.mqMobile.matches;
+    const compact = this.isMobile;
+
+    // Whenever p is pinned at 0 or 1 the transforms are constant, so skip the
+    // whole block. This keeps the page quiet at the top and below the hero.
+    const cacheKey = `${p.toFixed(4)}|${compact}`;
+    if (cacheKey === this.lastHeroKey) return;
+    this.lastHeroKey = cacheKey;
     const scale1 = compact ? 1 : 1 + p * 0.15;
     const scale2 = compact ? 1 : 1 + p * 0.1;
 
@@ -580,7 +688,6 @@ class AetherApp {
     if (wLeft) wLeft.style.transform = `translate3d(${-p * 140}px, ${p * 50}px, 0) rotate(${-p * 5}deg)`;
     if (wRight) wRight.style.transform = `translate3d(${p * 140}px, ${p * 50}px, 0) rotate(${p * 5}deg)`;
     if (heroScene) heroScene.style.transform = `scale(${1.035 + p * 0.045}) translate3d(0, ${p * 2}%, 0)`;
-    document.body.style.setProperty('--page-scroll', `${this.scrollProgress * 100}%`);
   }
 
   // Section 2: Pinned Aperture Progression
@@ -592,6 +699,9 @@ class AetherApp {
     if (total <= 0) return;
 
     const p = Math.max(0, Math.min(1, (scroll - metric.top) / total));
+    const cacheKey = p.toFixed(5);
+    if (cacheKey === this.lastApertureKey) return;
+    this.lastApertureKey = cacheKey;
 
     // Animate Iris blade
     const iris = this.els.apertureIris;
@@ -619,20 +729,31 @@ class AetherApp {
     if (this.els.step2) this.els.step2.classList.toggle('active', p >= 0.5);
     if (this.els.step3) this.els.step3.classList.toggle('active', p >= 0.9);
 
-    // Readout status
+    // Readout status — the strings change far more slowly than the scroll
+    // position, so compare before writing to avoid a recalc every frame.
     const phaseTitle = this.els.phaseTitle;
     const phaseVal = this.els.phaseVal;
 
     if (phaseTitle && phaseVal) {
+      let title;
+      let value;
       if (p < 0.35) {
-        phaseTitle.textContent = 'POLARIZING';
-        phaseVal.textContent = `SIGNAL: ${(12.0 + p * 8).toFixed(1)} THz`;
+        title = 'POLARIZING';
+        value = `SIGNAL: ${(12.0 + p * 8).toFixed(1)} THz`;
       } else if (p < 0.75) {
-        phaseTitle.textContent = 'COUPLING';
-        phaseVal.textContent = `LOCK: ${(94 + p * 5).toFixed(1)}%`;
+        title = 'COUPLING';
+        value = `LOCK: ${(94 + p * 5).toFixed(1)}%`;
       } else {
-        phaseTitle.textContent = 'SYNCHRONIZED';
-        phaseVal.textContent = 'LOCKED // OPTIMAL';
+        title = 'SYNCHRONIZED';
+        value = 'LOCKED // OPTIMAL';
+      }
+      if (title !== this.lastPhaseTitle) {
+        this.lastPhaseTitle = title;
+        phaseTitle.textContent = title;
+      }
+      if (value !== this.lastPhaseVal) {
+        this.lastPhaseVal = value;
+        phaseVal.textContent = value;
       }
     }
   }
@@ -641,19 +762,40 @@ class AetherApp {
   // Chrome's lazy loader keeps deferring their images long after the chapter
   // is on screen — the media boxes paint empty. Promote them to eager while
   // the chapter is still one viewport away so they are decoded on arrival.
+  // The reel's panels sit outside the viewport inside a transformed track, so
+  // Chrome's lazy loader defers their images until the chapter is on screen and
+  // the media boxes paint empty. Warm them during idle instead — staggered, so
+  // five decodes do not land in a single frame (which measured as a stall).
   watchReelImages() {
     const section = document.getElementById('horizontal-section');
-    if (!section || !('IntersectionObserver' in window)) return;
+    if (!section) return;
     const images = Array.from(section.querySelectorAll('.card-media img'));
     if (!images.length) return;
 
-    const observer = new IntersectionObserver((entries) => {
-      if (!entries.some((entry) => entry.isIntersecting)) return;
-      images.forEach((img) => { img.loading = 'eager'; });
-      observer.disconnect();
-    }, { rootMargin: '100% 0px' });
+    const promoted = new Set();
+    const promote = (img) => {
+      if (promoted.has(img)) return;
+      promoted.add(img);
+      img.loading = 'eager';
+      if (typeof img.decode === 'function') img.decode().catch(() => {});
+    };
 
-    observer.observe(section);
+    const warm = () => {
+      images.forEach((img, index) => setTimeout(() => promote(img), index * 140));
+    };
+
+    if ('requestIdleCallback' in window) requestIdleCallback(warm, { timeout: 3000 });
+    else setTimeout(warm, 1200);
+
+    // Safety net: if the chapter arrives first, promote whatever is left.
+    if ('IntersectionObserver' in window) {
+      const observer = new IntersectionObserver((entries) => {
+        if (!entries.some((entry) => entry.isIntersecting)) return;
+        images.forEach((img) => promote(img));
+        observer.disconnect();
+      }, { rootMargin: '100% 0px' });
+      observer.observe(section);
+    }
   }
 
   // Section 2 Oscilloscope Canvas
@@ -767,7 +909,7 @@ class AetherApp {
 
     const totalSteps = 6; // Intro + five system components
     const track = this.els.horizontalTrack;
-    const isTouchLayout = () => this.reducedMotion || this.mqMobile.matches;
+    const isTouchLayout = () => this.reducedMotion || this.isMobile;
 
     const scrollToStep = (index) => {
       if (isTouchLayout() && track) {
@@ -868,7 +1010,7 @@ class AetherApp {
     const track = this.els.horizontalTrack;
     if (!track) return;
 
-    if (this.mqMobile.matches) {
+    if (this.isMobile) {
       track.style.transform = 'none';
       return;
     }
@@ -879,6 +1021,9 @@ class AetherApp {
     if (total <= 0) return;
 
     const p = Math.max(0, Math.min(1, (scroll - metric.top) / total));
+    const cacheKey = p.toFixed(5);
+    if (cacheKey === this.lastHorizontalKey) return;
+    this.lastHorizontalKey = cacheKey;
 
     const maxTrackScroll = (this.trackScrollWidth || track.scrollWidth) - window.innerWidth;
     if (maxTrackScroll > 0) {
@@ -893,10 +1038,21 @@ class AetherApp {
     const p = Math.max(0, Math.min(1, progress));
     const fill = this.els.meterFill;
     const val = this.els.meterVal;
-    if (fill) fill.style.width = `${Math.max(10, p * 100)}%`;
+
+    // Quantise before writing: this runs on every scroll frame.
+    const fillPct = Math.round(Math.max(10, p * 100));
+    if (fill && fillPct !== this.lastMeterPct) {
+      this.lastMeterPct = fillPct;
+      fill.style.width = `${fillPct}%`;
+    }
 
     const activePipIndex = Math.min(5, Math.round(p * 5));
-    if (val) val.textContent = `${String(activePipIndex).padStart(2, '0')} / 05`;
+    if (val && activePipIndex !== this.lastPipIndex) {
+      val.textContent = `${String(activePipIndex).padStart(2, '0')} / 05`;
+    }
+    if (activePipIndex === this.lastPipIndex) return;
+    this.lastPipIndex = activePipIndex;
+
     this.els.pips.forEach((pip, idx) => {
       const isActive = idx === activePipIndex;
       pip.classList.toggle('active', isActive);
@@ -970,7 +1126,7 @@ class AetherApp {
   }
 
   updateStackDeck(scroll) {
-    if (this.reducedMotion || this.mqStackDesktop.matches) return;
+    if (this.reducedMotion || this.isStackDesktop) return;
 
     const metric = this.sectionMetric('stack-section');
     if (!metric) return;
@@ -978,19 +1134,25 @@ class AetherApp {
     if (scroll + window.innerHeight < metric.top || scroll > metric.top + metric.height) return;
 
     const cards = this.els.stackCards;
-    // Batch the reads first, then write: one layout flush instead of three.
-    const rects = cards.map((card) => (card ? card.getBoundingClientRect() : null));
+    const tops = this.stackCardTops;
+    const stickyTop = this.stackStickyTop || 120;
 
     cards.forEach((card, idx) => {
-      if (!card) return;
-      const rect = rects[idx];
-      if (rect && rect.top <= 140) {
-        const overlap = Math.max(0, 140 - rect.top);
-        const scale = Math.max(0.9, 1 - (idx * 0.03) - (overlap * 0.0003));
-        card.style.transform = `scale(${scale})`;
-      } else {
-        card.style.transform = 'scale(1)';
-      }
+      if (!card || !tops) return;
+      const docTop = tops[idx];
+      if (docTop == null) return;
+
+      // A sticky element sits at max(stickyTop, natural position).
+      const rectTop = Math.max(stickyTop, docTop - scroll);
+      const scale = rectTop <= 140
+        ? Math.max(0.9, 1 - idx * 0.03 - (140 - rectTop) * 0.0003)
+        : 1;
+
+      // Skip redundant transform writes.
+      const rounded = Math.round(scale * 1000) / 1000;
+      if (rounded === this.lastStackScales[idx]) return;
+      this.lastStackScales[idx] = rounded;
+      card.style.transform = `scale(${rounded})`;
     });
   }
 
@@ -1307,5 +1469,7 @@ class AetherApp {
 
 // Instantiate on DOM load
 window.addEventListener('DOMContentLoaded', () => {
-  new AetherApp();
+  const app = new AetherApp();
+  // Dev-only handle for profiling/debugging; stripped from production builds.
+  if (import.meta.env?.DEV) window.__aether = app;
 });
