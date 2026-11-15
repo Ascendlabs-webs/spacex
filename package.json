@@ -9,7 +9,9 @@
     "preview": "vite preview",
     "extract-assets": "node scripts/extract-site-assets.mjs",
     "optimize:images": "node scripts/optimize-images.mjs",
-    "generate:og": "node scripts/generate-og-image.mjs"
+    "generate:og": "node scripts/generate-og-image.mjs",
+    "self-host-fonts": "node scripts/self-host-fonts.mjs",
+    "check": "node --check src/main.js && node --check src/warp.js && node --check src/audio.js && node --check src/terminal.js"
   },
   "devDependencies": {
     "sharp": "^0.35.5",

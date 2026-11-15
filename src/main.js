@@ -79,6 +79,7 @@ class AetherApp {
     this.updateClock();
     this.refreshMetrics();
     this.onScroll(window.scrollY, document.documentElement.scrollHeight - window.innerHeight);
+    this.restoreHashTarget();
 
     // Layout can shift after webfonts swap in; keep cached metrics honest.
     if (document.fonts?.ready) document.fonts.ready.then(() => this.refreshMetrics());
@@ -94,6 +95,21 @@ class AetherApp {
         this.sizeApertureCanvas();
         this.onScroll(window.scrollY, document.documentElement.scrollHeight - window.innerHeight);
       }, 120);
+    });
+  }
+
+  // Honor an incoming chapter link (/#telemetry-section) once layout is ready.
+  restoreHashTarget() {
+    const id = window.location.hash.slice(1);
+    if (!id || !this.els.sections[id]) return;
+    const el = this.els.sections[id];
+    requestAnimationFrame(() => {
+      this.refreshMetrics();
+      const metric = this.sectionMetric(id);
+      const top = metric ? metric.top : el.offsetTop;
+      if (this.lenis) this.lenis.scrollTo(top, { immediate: true, force: true });
+      else window.scrollTo({ top, behavior: 'auto' });
+      this.onScroll(window.scrollY, document.documentElement.scrollHeight - window.innerHeight);
     });
   }
 
@@ -515,6 +531,9 @@ class AetherApp {
     if (current !== this.activeSection) {
       this.activeSection = current;
       if (!this.reducedMotion) sound.playTick(1400);
+
+      // Keep the URL shareable without adding a history entry per chapter.
+      if (history.replaceState) history.replaceState(null, '', `#${current}`);
 
       this.els.navLinks.forEach((link) => {
         const isActive = link.getAttribute('href') === `#${current}`;

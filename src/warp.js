@@ -387,6 +387,7 @@ export class WarpWorld {
       this.lastPointer = { x: event.clientX, y: event.clientY };
       this.look.targetX -= dx * 0.0026;
       this.look.targetY = Math.max(-0.9, Math.min(0.9, this.look.targetY - dy * 0.0022));
+      this.wake();
     };
     this.onPointerUp = (event) => {
       this.dragging = false;
@@ -397,6 +398,7 @@ export class WarpWorld {
       if (!this.active) return;
       event.preventDefault();
       this.targetSpeed = Math.max(0, Math.min(1, this.targetSpeed - event.deltaY * 0.0012));
+      this.wake();
     };
     this.onKey = (event) => {
       if (event.key === 'Escape' && this.active) {
@@ -405,12 +407,16 @@ export class WarpWorld {
       }
       if (event.key === 'ArrowUp') this.targetSpeed = Math.min(1, this.targetSpeed + 0.08);
       if (event.key === 'ArrowDown') this.targetSpeed = Math.max(0, this.targetSpeed - 0.08);
+      if (event.key === 'ArrowUp' || event.key === 'ArrowDown') this.wake();
     };
     this.onVisibility = () => {
       if (document.hidden) this.stopLoop();
-      else if (this.active) this.startLoop();
+      else if (this.active) this.wake();
     };
-    this.onResize = () => this.resize();
+    this.onResize = () => {
+      this.resize();
+      this.wake();
+    };
 
     canvas.addEventListener('pointerdown', this.onPointerDown);
     window.addEventListener('pointermove', this.onPointerMove);
@@ -468,6 +474,13 @@ export class WarpWorld {
     this.options.onClose?.();
   }
 
+  // In reduced-motion the scene is frozen, so the loop only runs while the
+  // fade and look settle. wake() restarts it for each interaction.
+  wake() {
+    if (this.reducedMotion) this.settled = false;
+    this.startLoop();
+  }
+
   startLoop() {
     if (this.frame) return;
     this.lastTime = performance.now();
@@ -497,6 +510,17 @@ export class WarpWorld {
     this.travel += dt * this.speed * (this.reducedMotion ? 0 : 60);
     this.warp = Math.max(0, this.warp - dt * 0.8);
     this.fade = Math.min(1, this.fade + dt * 1.6);
+
+    // Nothing is animating any more in reduced motion: stop until next input.
+    if (this.reducedMotion) {
+      const lookSettled =
+        Math.abs(this.look.targetX - this.look.x) < 0.0008 &&
+        Math.abs(this.look.targetY - this.look.y) < 0.0008;
+      const speedSettled = Math.abs(this.targetSpeed - this.speed) < 0.0015;
+      if (this.fade >= 1 && lookSettled && speedSettled) {
+        this.stopLoop();
+      }
+    }
 
     gl.uniform2f(this.uniforms.uRes, this.canvas.width, this.canvas.height);
     gl.uniform1f(this.uniforms.uTime, this.time);
